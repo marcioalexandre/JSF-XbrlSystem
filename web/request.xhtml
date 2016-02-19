@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      <!-- i = instanceController -->
+      <!-- d = xbrldocController -->
+    <h:head>
+        <title>Result Page</title>
+    </h:head>
+    <h:body>
+        <h1>JSF-based XBRL Instance Editor</h1>
+        
+        <h:form>
+            <!--
+            <h:outputLabel id="typeLbl" value="Type: " />
+            <h:outputText id="typeTxt" value="#{loader.file.contentType}"  /><p/>
+            -->
+            <f:metadata id="documentRender">
+                <f:event id="docEvent1" type="preRenderView" listener="#{d.document.setDoc(loader.file)}"  />
+                <f:event id="instanceEvent1" type="preRenderView" listener="#{i.instance.getElementFromDoc(d.document.doc)}"  />
+            </f:metadata>
+            <h:outputLabel id="nameLbl" value="XBRL File Name: " />
+            <h:outputText id="nameTxt" value="#{d.document.name}"  /><p/><p/>
+            <h:dataTable value="#{i.instance.elementList}" var="ele" bgcolor="#EEEEEE" >
+                <h:column>
+                    <f:facet name="header">#.</f:facet>
+                    #{ele.number}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Element Name</f:facet>
+                    <h:inputTextarea value="#{ele.name}" rows="1" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Value</f:facet>
+                    <h:inputTextarea value="#{ele.value}" rows="1" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">ContextRef</f:facet>
+                    <h:inputTextarea value="#{ele.contextRef}"  rows="1" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Id</f:facet>
+                    <h:inputTextarea value="#{ele.id}" rows="1" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Decimals</f:facet>
+                    <h:inputTextarea value="#{ele.decimals}"  rows="1" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">UnitRef</f:facet>
+                    <h:inputTextarea value="#{ele.unitRef}" rows="1" />
+                </h:column>
+            </h:dataTable>
+            <p/>
+            <h:commandButton value="ETL: To R-DBMS..." onclick="javascript:alert('you must code this method')" action="#{i.instance.saveRDBMS()}">
+                <f:ajax execute="@form" render="@all" />
+            </h:commandButton> 
+            <h:commandButton value="ETL: To Json..." onclick="javascript:alert('you must code this method')" action="#{i.instance.saveJson()}">
+                <f:ajax execute="@form" render="@all" />
+            </h:commandButton>
+            <h:commandButton value="ETL: To Other Format..." onclick="javascript:alert('you must code this method')" action="#{i.instance.saveOther()}">
+                <f:ajax execute="@form" render="@all" />
+            </h:commandButton>
+            <h:commandButton value="Save data in same file (XBRL)" onclick="javascript:alert('you must code this method')" action="#{i.instance.saveXbrl()}">
+                <f:ajax execute="@form" render="@all" />
+            </h:commandButton><p/>            
+        </h:form>
+        <p />
+        <p />
+        <h:link outcome="index" value="Loading Page" />
+        <p />
+        <p />
+    </h:body>
+</html>
+
+<!-- documentation (PT-BR):
+http://www.guj.com.br/t/chamar-metodo-ao-carregar-pagina-jsf/163604/20
+Transformar file.inputStream em DocumentBuilder: http://www.tutorialspoint.com/java/xml/javax_xml_parsers_documentbuilder_inputstream.htm
+List no JSF: http://www.guj.com.br/t/resolvido-duvida-jsf-list-no-outputtext/197576/6
+-->
+
