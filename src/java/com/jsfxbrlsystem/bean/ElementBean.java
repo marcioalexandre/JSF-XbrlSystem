@@ -32,7 +32,11 @@ public class ElementBean {
     }
 
     public void setName(String name) {
-        this.name = name;
+        String[] ele = name.split(":");
+        if (ele.length > 1)
+            this.name = ele[1];
+        else
+            this.name = ele[0];
     }
 
     public String getContextRef() {

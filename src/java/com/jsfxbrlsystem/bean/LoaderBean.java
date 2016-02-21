@@ -24,7 +24,8 @@ import javax.faces.validator.ValidatorException;
 @ManagedBean(name="loader")
 @SessionScoped
 public class LoaderBean implements Serializable {
-    private Part file; 
+    private Part file;
+    private String fileAsString;
     private static final int MAX_SIZE = 5 * 1024 * 1024;
     
     public String importing() {
@@ -32,6 +33,7 @@ public class LoaderBean implements Serializable {
         try {
             String content = new Scanner(file.getInputStream())
                 .useDelimiter("\\A").next();
+            this.fileAsString = content;
             result = "ok";
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,7 +41,6 @@ public class LoaderBean implements Serializable {
         return result;
     }
     public void validator(FacesContext context, UIComponent component, Object value) {
-
         Part file = (Part) value;
         if (file.getSize() > MAX_SIZE) {
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, 

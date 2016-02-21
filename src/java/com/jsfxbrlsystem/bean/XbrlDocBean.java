@@ -17,6 +17,7 @@ import org.w3c.dom.Document;
 public class XbrlDocBean {
     private String name;
     private Document doc;
+    private String docAsString;
     
     public Document getDoc() {
         return doc;
@@ -26,7 +27,7 @@ public class XbrlDocBean {
         return name;
     }
 
-    public void setDoc(Part file) {
+    public void setDocAsPart(Part file) {
         try{
             DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = domFactory.newDocumentBuilder();
@@ -40,5 +41,9 @@ public class XbrlDocBean {
             e.printStackTrace();
         }
     }
+    
+    public void setDocAsString(String file) {
+        this.docAsString = file;
+    }    
     
 }

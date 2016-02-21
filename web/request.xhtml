@@ -17,8 +17,8 @@
             <h:outputText id="typeTxt" value="#{loader.file.contentType}"  /><p/>
             -->
             <f:metadata id="documentRender">
-                <f:event id="docEvent1" type="preRenderView" listener="#{d.document.setDoc(loader.file)}"  />
-                <f:event id="instanceEvent1" type="preRenderView" listener="#{i.instance.getElementFromDoc(d.document.doc)}"  />
+                <f:event id="docEvent1" type="preRenderView" listener="#{d.document.setDocAsPart(loader.file)}"  />
+                <f:event id="instanceEvent1" type="preRenderView" listener="#{i.instance.getElementsFromDoc(d.document.doc)}"  />
             </f:metadata>
             <h:outputLabel id="nameLbl" value="XBRL File Name: " />
             <h:outputText id="nameTxt" value="#{d.document.name}"  /><p/><p/>
@@ -68,7 +68,7 @@
         </h:form>
         <p />
         <p />
-        <h:link outcome="index" value="Loading Page" />
+        <h:link outcome="index" value="Choose another XBRL file" />
         <p />
         <p />
     </h:body>

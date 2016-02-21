@@ -14,7 +14,11 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.w3c.dom.Attr;
+
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -72,27 +76,25 @@ public class XbrlInstanceBean {
     }
        
     /**
-     * @description: This method loads all data from XML to Java variables.
+     * @deprecated 
+     * @reason: this method has a very low performance
+     * @description: This method loads all data from XML to Java variables through XPath Technology.
      */
-    public void getElementFromDoc(Document doc) throws XPathExpressionException, Exception{
+    public void getElementFromDocXPath(Document doc) throws XPathExpressionException, Exception{
         System.out.println("Starting getElementFromDoc...");
          XPath xPath = XPathFactory.newInstance().newXPath();
-            String eleXPath = "(//xbrl/*[@contextRef])";
+            String eleXPath = "(//xbrl/*[@contextRef != '']/(@*|text()))";
             NodeList nodeList = (NodeList) xPath.evaluate(eleXPath, doc, XPathConstants.NODESET);
             ArrayList<ElementBean> eleBeanList = new ArrayList<ElementBean>();
             ElementBean eleBean;
             System.out.println("Starting processing...");
+            long start = System.currentTimeMillis();
+            long end = 0;
             for(int i=0; i < nodeList.getLength(); i++){
                 eleBean = new ElementBean();  
-                
                 eleBean.setNumber(i+1);
-                
-                String[] ele = nodeList.item(i).getNodeName().split(":");
-                if (ele.length > 1)
-                    eleBean.setName(ele[1]);
-                else
-                    eleBean.setName(ele[0]);
-                
+                eleBean.setName(nodeList.item(i).getNodeName());
+                                
                 String crXPath = "(//xbrl/"+eleBean.getName()+"/@contextRef)";
                 Node crNode = (Node) xPath.evaluate(crXPath, doc, XPathConstants.NODE);
                 if (crNode != null)
@@ -125,7 +127,89 @@ public class XbrlInstanceBean {
                
             }
             this.elementList = eleBeanList;
+            end = System.currentTimeMillis();
             System.out.println("...processing is done!");
+            System.out.println(doc.toString());
+            System.out.print("Performance Time (milliseconds): "+(end-start));
+    }
+    
+    public void getElementsFromDoc(Document doc) throws XPathExpressionException, Exception{
+        // http://stackoverflow.com/questions/2460592/xpath-how-to-get-all-the-attribute-names-and-values-of-an-element
+        // http://stackoverflow.com/questions/11863038/how-to-get-the-attribute-value-of-an-xml-node-using-java
+        System.out.println("Starting getElementsFromDoc...");
+
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        ArrayList<ElementBean> eleList = new ArrayList<ElementBean>();
+        // String xp = "(//xbrl/*[@contextRef != '']/(@*|text()))"; //xpath 2.0
+        String xp = "(//xbrl/*[@contextRef != ''])";
+        NodeList nl = (NodeList) xPath.evaluate(xp, doc, XPathConstants.NODESET);
+        ElementBean ele;
+        long start = System.currentTimeMillis();
+        long end = 0;
+        int size = nl.getLength();
+        for (int i=0; i<nl.getLength(); i++){
+            //laço para carregar todos os atributos do elemento
+            ele = new ElementBean();
+            ele.setNumber(i+1);
+            ele.setName(nl.item(i).getNodeName());
+            NamedNodeMap nl2 = nl.item(i).getAttributes();
+            //System.out.println("Attrs number: "+nl2.getLength());
+            for (int j=0; j<nl2.getLength();j++){
+                Attr attr = (Attr) nl2.item(j);
+                String name = attr.getName().trim();
+                String value = attr.getValue().trim();
+                //System.out.println("Attr name: "+name+", value: "+value);
+                if (name.equals("contextRef"))
+                    ele.setContextRef(value);
+                else if (name.equals("id"))
+                    ele.setId(value);
+                else if (name.equals("decimals"))
+                    ele.setDecimals(value);
+                else if (name.equals("unitRef"))
+                    ele.getUnitRef();
+            }
+            
+        
+            String elexp = "//xbrl/*";
+            if (ele.getContextRef() != null){
+                elexp += "[@contextRef = '"+ele.getContextRef()+"']";
+            }
+            if (ele.getId() != null){
+                elexp += "[@id = '"+ele.getId()+"']";
+            }
+            if (ele.getDecimals() != null){
+                elexp += "[@decimals = '"+ele.getDecimals()+"']";
+            }
+            if (ele.getUnitRef() != null){
+                elexp += "[@unitRef = '"+ele.getUnitRef()+"']";
+            }
+            //System.out.println("xpath to Get name:"+elexp);
+            //System.out.println(elexp);
+            Node n = (Node) xPath.evaluate(elexp, doc, XPathConstants.NODE);
+            ele.setName(n.getNodeName());
+
+            elexp = elexp.replace("*", ele.getName());
+            String valuexp = elexp+"/text()";
+            //System.out.println(valuexp);
+            Node n2 = (Node) xPath.evaluate(valuexp, doc, XPathConstants.NODE);
+            if (n2 != null){
+                ele.setValue(n2.getNodeValue());
+            }
+            eleList.add(ele);
+        }
+        this.elementList = eleList;
+        //System.out.println("Element number: "+size);
+        //System.out.println("Element number in list: "+eleList.size());
+        end = System.currentTimeMillis();
+        System.out.print("Performance Time (milliseconds): "+(end-start));
+    }
+        
+    /**
+     * @description: This method loads all data from XML to Java variables through Zorba library.
+     */
+    public void getElementFromDocJson(Document doc){
+        //http://docs.zorba.io.s3-website-us-east-1.amazonaws.com/3.0.0/java/Test_Zorba_8java-example.html
+        //http://rabidgadfly.com/2013/02/angular-and-xml-no-problem/ 
     }
     
     /**
