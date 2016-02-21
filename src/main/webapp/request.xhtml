@@ -18,7 +18,8 @@
             -->
             <f:metadata id="documentRender">
                 <f:event id="docEvent1" type="preRenderView" listener="#{d.document.setDocAsPart(loader.file)}"  />
-                <f:event id="instanceEvent1" type="preRenderView" listener="#{i.instance.getElementsFromDoc(d.document.doc)}"  />
+                <f:event id="docEvent1" type="preRenderView" listener="#{d.document.setDocAsString(loader.fileAsString) }"  />
+                <f:event id="instanceEvent1" type="preRenderView" listener="#{i.instance.getElementsFromDoc_BR(d.document.docAsBufferedReader, d.document.doc)}"  />
             </f:metadata>
             <h:outputLabel id="nameLbl" value="XBRL File Name: " />
             <h:outputText id="nameTxt" value="#{d.document.name}"  /><p/><p/>

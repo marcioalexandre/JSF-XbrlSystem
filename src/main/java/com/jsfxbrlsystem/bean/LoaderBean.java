@@ -26,7 +26,16 @@ import javax.faces.validator.ValidatorException;
 public class LoaderBean implements Serializable {
     private Part file;
     private String fileAsString;
+    
     private static final int MAX_SIZE = 5 * 1024 * 1024;
+
+    public String getFileAsString() {
+        return fileAsString;
+    }
+
+    public void setFileAsString(String fileAsString) {
+        this.fileAsString = fileAsString;
+    }
     
     public String importing() {
         String result = "index";

@@ -5,6 +5,8 @@
  *
  */
 package com.jsfxbrlsystem.bean;
+import java.io.BufferedReader;
+import java.io.StringReader;
 import javax.servlet.http.Part;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -45,5 +47,11 @@ public class XbrlDocBean {
     public void setDocAsString(String file) {
         this.docAsString = file;
     }    
+    
+    public BufferedReader getDocAsBufferedReader(){
+        StringReader sr = new StringReader(this.docAsString); // wrap your String
+        BufferedReader br = new BufferedReader(sr); // wrap your StringReader
+        return br;
+    }
     
 }

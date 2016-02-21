@@ -6,10 +6,13 @@
  */
 package com.jsfxbrlsystem.bean;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -17,10 +20,10 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Attr;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 
 /**
  *
@@ -34,6 +37,13 @@ public class XbrlInstanceBean {
     private ArrayList<ContextBean> contextList; //0..N
     private ArrayList<ElementBean> elementList; //0..N
     private ArrayList<ExtendedLinkbaseDocumentBean> extendedlinkbaseList; //footnotelink; //0..1
+    //regular expressions
+    private String reXmlLine = "^(?!<[link:.*|xbrl.*|\\p{Punct}.*|segment.*|context.*])((<.*[-]{1}.*:.*>.*)|(<.*:.*>.*))$";; 
+    private String reElementName  = "(?<=:)\\w+\\s";
+    private String reContextRef = "((?<=context[R|r]ef\\p{Punct}{1}).+[\"\'])"; 
+    private String reUnitRef = "((?<=unit[R|r]ef\\p{Punct}{1}).+[\"\'])";
+    private String reDecimals = "((?<=decimals\\p{Punct}{1}).+[\"\'])";
+    private String reId = "(?<=id=[\"\']).*(?=[\"\'])";	
 
     public RootBean getRoot() {
         return root;
@@ -77,7 +87,7 @@ public class XbrlInstanceBean {
        
     /**
      * @deprecated 
-     * @reason: this method has a very low performance
+     * @reason: this method has a very low performance and wrong result
      * @description: This method loads all data from XML to Java variables through XPath Technology.
      */
     public void getElementFromDocXPath(Document doc) throws XPathExpressionException, Exception{
@@ -133,6 +143,11 @@ public class XbrlInstanceBean {
             System.out.print("Performance Time (milliseconds): "+(end-start));
     }
     
+    /**
+     * @deprecated 
+     * @reason: this method has a very low performance and wrong result
+     * @description This method loads all data from XML to Java variables through Zorba library.
+     */
     public void getElementsFromDoc(Document doc) throws XPathExpressionException, Exception{
         // http://stackoverflow.com/questions/2460592/xpath-how-to-get-all-the-attribute-names-and-values-of-an-element
         // http://stackoverflow.com/questions/11863038/how-to-get-the-attribute-value-of-an-xml-node-using-java
@@ -207,9 +222,116 @@ public class XbrlInstanceBean {
     /**
      * @description: This method loads all data from XML to Java variables through Zorba library.
      */
-    public void getElementFromDocJson(Document doc){
+    public void getElementFromDoc_Json(Document doc){
         //http://docs.zorba.io.s3-website-us-east-1.amazonaws.com/3.0.0/java/Test_Zorba_8java-example.html
         //http://rabidgadfly.com/2013/02/angular-and-xml-no-problem/ 
+    }
+    
+    /**
+     * @param br
+     * @param doc
+     * @description: This method loads all data from XML to Java variables through BufferedReader class.
+     */
+    public void getElementsFromDoc_BR(BufferedReader br, Document doc) throws IOException, XPathExpressionException {
+        long start = System.currentTimeMillis();
+        long end = 0;
+        ArrayList<ElementBean> endEleList = new ArrayList<ElementBean>();
+        ArrayList<ElementBean> tempEleList = this.getSomeAttr(br);
+        //get data through XPath 1.0 with above taken data
+        for (ElementBean ele: tempEleList){
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            String xp = "(//xbrl/"+ele.getName();
+            if (ele.getContextRef() != null){
+                xp += "[@contextRef = '"+ele.getContextRef()+"']";
+            }
+            if (ele.getId() != null){
+                xp += "[@id = '"+ele.getId()+"']";
+            }
+            if (ele.getDecimals() != null){
+                xp += "[@decimals = '"+ele.getDecimals()+"']";
+            }
+            if (ele.getUnitRef() != null){
+                xp += "[@unitRef = '"+ele.getUnitRef()+"']";
+            }
+            xp += "/text())";
+            //System.out.println(xp);
+            Node node = (Node) xPath.evaluate(xp, doc, XPathConstants.NODE);
+            if (node != null)
+                ele.setValue(node.getNodeValue());
+            endEleList.add(ele);
+        }
+        end = System.currentTimeMillis();
+        System.out.print("Performance Time (milliseconds): "+(end-start));
+        this.elementList = endEleList;
+    }
+    
+    /**
+     * @description: This method get element name, contextRef, unitRef, id, decimals attr
+     */
+    public ArrayList<ElementBean> getSomeAttr(BufferedReader br) {
+        ArrayList<ElementBean> eleList = new ArrayList<ElementBean>();
+        //getting some data through Regular Expressions
+        try{
+            int j=1;
+            String currentLine;
+            while ((currentLine = br.readLine()) != null){
+                currentLine = currentLine.trim();
+                ElementBean ele = new ElementBean();
+                Pattern p = Pattern.compile(this.reXmlLine);
+                Matcher m = p.matcher(currentLine);
+                if (m.find()){
+                    ele.setNumber(j);
+                    String line = m.group();
+                    Pattern pname = Pattern.compile(this.reElementName);
+                    Matcher mname = pname.matcher(line);
+                    if (mname.find()){
+                            ele.setName(mname.group().trim());
+                    }else{	}
+                    // setting element id
+                    Pattern pid = Pattern.compile(this.reId);
+                    Matcher mid = pid.matcher(line);
+                    if (mid.find()){
+                            String[] rid = mid.group().split("\\s");
+                            rid[0] = rid[0].replace("\"","");
+                            rid[0] = rid[0].replace("\'","");
+                            rid[0] = rid[0].replace(">&lt;div",""); 
+                            ele.setId(rid[0].trim());
+                    }else{	}
+                    //setting Element Context_Ref
+                    Pattern pcr = Pattern.compile(this.reContextRef);
+                    Matcher mcr = pcr.matcher(line);
+                    if (mcr.find()){
+                            String[] rcr = mcr.group().split("\\s");
+                            rcr[0] = rcr[0].replace("\"","");
+                            rcr[0] = rcr[0].replace("\'","");
+                            ele.setContextRef(rcr[0].trim());
+                    }else{  }
+                    //setting Element Unit_Ref
+                    Pattern pur	= Pattern.compile(this.reUnitRef);
+                    Matcher mur	= pur.matcher(line);
+                    if (mur.find()){
+                            String[] rur	=	mur.group().split("\\s"); 
+                            rur[0]	= rur[0].replace("\"","");
+                            rur[0]	= rur[0].replace("\'","");
+                            ele.setUnitRef(rur[0].trim());
+                    }
+                    //setting Element Decimals
+                    Pattern pd	= Pattern.compile(this.reDecimals);
+                    Matcher md	= pd.matcher(line);
+                    if (md.find()){
+                            String[] rd = md.group().split("\\s");
+                            rd[0] = rd[0].replace("\"","");
+                            rd[0] = rd[0].replace("\'","");
+                            ele.setDecimals(rd[0].trim());
+                    }
+                    eleList.add(ele);
+                    j++;
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return eleList;
     }
     
     /**
