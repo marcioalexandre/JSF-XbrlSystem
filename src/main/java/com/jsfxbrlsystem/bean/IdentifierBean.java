@@ -12,8 +12,8 @@ package com.jsfxbrlsystem.bean;
  */
 public class IdentifierBean {
     private String schema;
-    private String value;
-
+    private String value; 
+    
     public String getSchema() {
         return schema;
     }

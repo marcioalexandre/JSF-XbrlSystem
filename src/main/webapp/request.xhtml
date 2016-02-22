@@ -12,10 +12,10 @@
         <h1>JSF-based XBRL Instance Editor</h1>
         
         <h:form>
-            <!--
+            
             <h:outputLabel id="typeLbl" value="Type: " />
             <h:outputText id="typeTxt" value="#{loader.file.contentType}"  /><p/>
-            -->
+            
             <f:metadata id="documentRender">
                 <f:event id="docEvent1" type="preRenderView" listener="#{d.document.setDocAsPart(loader.file)}"  />
                 <f:event id="docEvent1" type="preRenderView" listener="#{d.document.setDocAsString(loader.fileAsString) }"  />
@@ -23,6 +23,17 @@
             </f:metadata>
             <h:outputLabel id="nameLbl" value="XBRL File Name: " />
             <h:outputText id="nameTxt" value="#{d.document.name}"  /><p/><p/>
+            <h:dataTable value="#{i.instance.contextList}" var="context" bgcolor="#EEEEEE" >
+                <h:column>
+                    <f:facet name="header">Scheme</f:facet>
+                    <h:inputTextarea value="#{context.entitity.identifier.schema}" rows="1" />
+                </h:column>
+               <h:column>
+                    <f:facet name="header">Identifier</f:facet>
+                    <h:inputTextarea value="#{context.entitity.identifier.value}" rows="1" />
+                </h:column>
+            </h:dataTable>
+            <p/>
             <h:dataTable value="#{i.instance.elementList}" var="ele" bgcolor="#EEEEEE" >
                 <h:column>
                     <f:facet name="header">#.</f:facet>
