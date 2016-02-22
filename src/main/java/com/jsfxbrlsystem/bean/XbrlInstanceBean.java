@@ -155,7 +155,7 @@ public class XbrlInstanceBean {
         long end = 0;
         XPath xPath = XPathFactory.newInstance().newXPath();
         ArrayList<ElementBean> endEleList = new ArrayList<ElementBean>();
-        ArrayList<ElementBean> tempEleList = this.getSomeAttr_Sec(br);
+        ArrayList<ElementBean> tempEleList = this.getSomeXbrlAttr(br);
         //get data through XPath 1.0 with above taken data
         for (ElementBean ele: tempEleList){
             xPath = XPathFactory.newInstance().newXPath();
@@ -207,8 +207,7 @@ public class XbrlInstanceBean {
     /**
      * @description: This method get element name, contextRef, unitRef, id, decimals attr from SEC files
      */
-    public ArrayList<ElementBean> getSomeAttr_Sec(BufferedReader br) {
-        System.out.println("getSomeAttr_Sec method");
+    public ArrayList<ElementBean> getSomeXbrlAttr(BufferedReader br) {
         ArrayList<ElementBean> eleList = new ArrayList<ElementBean>();
         //getting some data through Regular Expressions
         try{
@@ -221,7 +220,6 @@ public class XbrlInstanceBean {
                     Pattern p = Pattern.compile(this.reXmlLine);
                     Matcher m = p.matcher(currentLine);
                     if (m.find()){
-                        System.out.println("Linha: "+j+" - "+currentLine);
                         ele.setNumber(j);
                         String line = m.group();
                         Pattern pname = Pattern.compile(this.reElementName);
