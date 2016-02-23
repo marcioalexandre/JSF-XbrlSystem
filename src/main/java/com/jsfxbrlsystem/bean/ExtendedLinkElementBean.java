@@ -7,18 +7,33 @@
 package com.jsfxbrlsystem.bean;
 
 import java.util.ArrayList;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 /**
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
+@Entity
 public class ExtendedLinkElementBean {
+    @Id
+    @GeneratedValue
+    private int idExtLinkEle;
     private String name; //(eg.: <link:footnote ...>, <link: label ...>, <link: geodata...>, <link: calculation...>
     private String label;
     private String role;
     private String type="resource";
     private String lang;
     private ArrayList<AttributeBean> attributeList; //0..1 (others optional attributes)
+
+    public int getIdExtLinkEle() {
+        return idExtLinkEle;
+    }
+
+    public void setIdExtLinkEle(int idExtLinkEle) {
+        this.idExtLinkEle = idExtLinkEle;
+    }
 
     public String getName() {
         return name;

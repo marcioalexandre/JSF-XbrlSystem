@@ -6,38 +6,35 @@
  */
 package com.jsfxbrlsystem.bean;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
+@Entity
 public class PeriodBean {
-    private String startDate;
-    private String endDate;
-    private String instant;
+    @Id
+    @GeneratedValue
+    private int idPeriod;
+    private AttributeBean attrList;
 
-    public String getStartDate() {
-        return startDate;
+    public int getIdPeriod() {
+        return idPeriod;
     }
 
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
+    public void setIdPeriod(int idPeriod) {
+        this.idPeriod = idPeriod;
     }
 
-    public String getEndDate() {
-        return endDate;
+    public AttributeBean getAttrList() {
+        return attrList;
     }
 
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
+    public void setAttrList(AttributeBean attrList) {
+        this.attrList = attrList;
     }
-
-    public String getInstant() {
-        return instant;
-    }
-
-    public void setInstant(String instant) {
-        this.instant = instant;
-    }
-    
     
 }

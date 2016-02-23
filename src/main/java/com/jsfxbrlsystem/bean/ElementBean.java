@@ -6,11 +6,19 @@
  */
 package com.jsfxbrlsystem.bean;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
+@Entity
 public class ElementBean {
+    @Id
+    @GeneratedValue
+    private int idElement;
     private int number;
     private String name;
     private String contextRef;
@@ -18,6 +26,14 @@ public class ElementBean {
     private String decimals;
     private String id;
     private String value;
+
+    public int getIdElement() {
+        return idElement;
+    }
+
+    public void setIdElement(int idElement) {
+        this.idElement = idElement;
+    }
 
     public int getNumber() {
         return number;

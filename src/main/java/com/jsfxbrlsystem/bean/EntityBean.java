@@ -6,13 +6,29 @@
  */
 package com.jsfxbrlsystem.bean;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
+@Entity
 public class EntityBean {
+    @Id
+    @GeneratedValue
+    private int idEntity;
     private IdentifierBean identifier;
     private SegmentBean segment;
+
+    public int getIdEntity() {
+        return idEntity;
+    }
+
+    public void setIdEntity(int idEntity) {
+        this.idEntity = idEntity;
+    }
 
     public IdentifierBean getIdentifier() {
         return identifier;

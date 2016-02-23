@@ -7,6 +7,9 @@
 package com.jsfxbrlsystem.bean;
 import java.io.BufferedReader;
 import java.io.StringReader;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.servlet.http.Part;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,11 +18,22 @@ import org.w3c.dom.Document;
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
-
+@Entity
 public class XbrlDocBean {
+    @Id
+    @GeneratedValue
+    private int idDoc;
     private String name;
     private Document doc;
     private String docAsString;
+
+    public int getIdDoc() {
+        return idDoc;
+    }
+
+    public void setIdDoc(int idDoc) {
+        this.idDoc = idDoc;
+    }
     
     public Document getDoc() {
         return doc;

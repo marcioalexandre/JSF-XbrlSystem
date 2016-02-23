@@ -6,12 +6,28 @@
  */
 package com.jsfxbrlsystem.bean;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
+@Entity
 public class SegmentBean {
+    @Id
+    @GeneratedValue
+    private int idSegment;
     private ExplicitMemberBean explicitMember;
+
+    public int getIdSegment() {
+        return idSegment;
+    }
+
+    public void setIdSegment(int idSegment) {
+        this.idSegment = idSegment;
+    }
 
     public ExplicitMemberBean getExplicitMember() {
         return explicitMember;

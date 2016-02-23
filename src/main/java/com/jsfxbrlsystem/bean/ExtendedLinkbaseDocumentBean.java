@@ -7,12 +7,19 @@
 package com.jsfxbrlsystem.bean;
 
 import java.util.ArrayList;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 /**
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
+@Entity
 public class ExtendedLinkbaseDocumentBean {
+    @Id
+    @GeneratedValue
+    private int idExtLinkDoc;
     //FootNote, Label, Presentation, Calculation, Reference, definir or geoXBRL anyone else.
     private RootBean root; // 0..1 [if it's another XML document (eg.: <linkbase...>)
     private ArrayList<SimpleLinkBean> simplelink;

@@ -13,6 +13,9 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -29,8 +32,11 @@ import org.w3c.dom.NodeList;
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
-
+@Entity
 public class XbrlInstanceBean {
+    @Id
+    @GeneratedValue
+    private int idInstance;
     private Document doc;
     private RootBean root; // 0..1 (eg.: xbrl)
     private ArrayList<SimpleLinkBean> simplelinkList; // 0..N. (ex.: SchemaRef, roleref ...)
@@ -38,7 +44,7 @@ public class XbrlInstanceBean {
     private ArrayList<ElementBean> elementList; //0..N
     private ArrayList<ExtendedLinkbaseDocumentBean> extendedlinkbaseList; //footnotelink; //0..1
     //XBRL Regular Expressions
-    private String reXmlLine = "^(?!<[link:.*|xbrl.*])((<\\w*[-]{1}\\w*:\\w*\\s.*>.*)|(<\\w*:\\w*\\s.*>.*)|(<ifrs:\\w*\\s.*>.*))"; 
+    private String reXmlLine = "^(?!<[link:.*|xbrl.*])((<\\w*[-]{1}\\w*:\\w*\\s.*>.*)|(<\\w*:\\w*\\s.*>.*))"; 
     private String reElementName  = "(?<=:)\\w+\\s";
     private String reContextRef = "((?<=context[R|r]ef\\p{Punct}{1}).+[\"\'])"; 
     private String reUnitRef = "((?<=unit[R|r]ef\\p{Punct}{1}).+[\"\'])";
@@ -46,6 +52,22 @@ public class XbrlInstanceBean {
     private String reId = "(?<=id=[\"\']).*(?=[\"\'])";	
     //Non-SEC taxonoy regular expressions
 
+    public int getIdInstance() {
+        return idInstance;
+    }
+
+    public void setIdInstance(int idInstance) {
+        this.idInstance = idInstance;
+    }
+
+    public Document getDoc() {
+        return doc;
+    }
+
+    public void setDoc(Document doc) {
+        this.doc = doc;
+    }
+    
     public RootBean getRoot() {
         return root;
     }

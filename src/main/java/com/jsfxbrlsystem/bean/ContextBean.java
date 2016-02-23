@@ -6,11 +6,19 @@
  */
 package com.jsfxbrlsystem.bean;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
+@Entity
 public class ContextBean {
+    @Id
+    @GeneratedValue
+    private int idContext;
     private EntityBean entitity;
     private PeriodBean period;
 
