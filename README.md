@@ -16,4 +16,4 @@ Technologies:
 - JSF
 - Log4J
 
-Screenshots may be seen in following link: https://marcioalexandre.wordpress.com/2016/02/19/jsf-based-web-app-for-loading-xbrl-reports/
+Screenshots may be seen in following link: https://marcioalexandre.wordpress.com/2016/02/19/xbrl_jsf/
