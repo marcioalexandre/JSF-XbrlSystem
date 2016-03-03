@@ -13,35 +13,49 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import org.w3c.dom.Attr;
-
 import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-
+import org.apache.log4j.Logger;
 /**
  *
  * @author Marcio Alexandre P. da Silva <email: marcio.alexandre83@gmail.com>
  */
 @Entity
-public class XbrlInstanceBean {
+@Table( name = "XbrlInstanceBean" )
+public class XbrlInstanceBean  {
+    //log
+    private static final Logger logger = Logger.getLogger(XbrlInstanceBean.class);
+    //attributes
     @Id
     @GeneratedValue
     private int idInstance;
+    @Column
     private Document doc;
+    @Column
     private RootBean root; // 0..1 (eg.: xbrl)
+    @OneToMany (cascade = {CascadeType.ALL},mappedBy = "SimpleLinkBean",
+            targetEntity = com.jsfxbrlsystem.bean.SimpleLinkBean.class)
     private ArrayList<SimpleLinkBean> simplelinkList; // 0..N. (ex.: SchemaRef, roleref ...)
+    @OneToMany (cascade = {CascadeType.ALL},mappedBy = "ContextBean",
+            targetEntity = com.jsfxbrlsystem.bean.ContextBean.class)
     private ArrayList<ContextBean> contextList; //0..N
+    @OneToMany (cascade = {CascadeType.ALL},mappedBy = "ElementBean",
+            targetEntity = com.jsfxbrlsystem.bean.ElementBean.class)
     private ArrayList<ElementBean> elementList; //0..N
+    @OneToMany (cascade = {CascadeType.ALL},mappedBy = "ExtendedLinkbaseDocumentBean",
+            targetEntity = com.jsfxbrlsystem.bean.ExtendedLinkbaseDocumentBean.class)
     private ArrayList<ExtendedLinkbaseDocumentBean> extendedlinkbaseList; //footnotelink; //0..1
     //XBRL Regular Expressions
     private String reXmlLine = "^(?!<[link:.*|xbrl.*])((<\\w*[-]{1}\\w*:\\w*\\s.*>.*)|(<\\w*:\\w*\\s.*>.*))"; 
@@ -50,8 +64,25 @@ public class XbrlInstanceBean {
     private String reUnitRef = "((?<=unit[R|r]ef\\p{Punct}{1}).+[\"\'])";
     private String reDecimals = "((?<=decimals\\p{Punct}{1}).+[\"\'])";
     private String reId = "(?<=id=[\"\']).*(?=[\"\'])";	
-    //Non-SEC taxonoy regular expressions
+    
 
+    //methods
+    public XbrlInstanceBean(){
+        //it is used by Hibernate
+    }
+    
+    public XbrlInstanceBean(Document doc, RootBean root, 
+            ArrayList<SimpleLinkBean> slink, ArrayList<ContextBean> con, ArrayList<ElementBean> ele,
+                    ArrayList<ExtendedLinkbaseDocumentBean> elink){
+        //it is used by JUnit
+        this.doc = doc;
+        this.root = root;
+        this.simplelinkList = slink;
+        this.contextList = con;
+        this.elementList = ele;
+        this.extendedlinkbaseList = elink;
+    }
+    
     public int getIdInstance() {
         return idInstance;
     }
@@ -114,56 +145,56 @@ public class XbrlInstanceBean {
      * @description: This method loads all data from XML to Java variables through XPath Technology.
      */
     public void getElementFromDocXPath(Document doc) throws XPathExpressionException, Exception{
-        System.out.println("Starting getElementFromDoc...");
-         XPath xPath = XPathFactory.newInstance().newXPath();
-            String eleXPath = "(//xbrl/*[@contextRef != '']/(@*|text()))";
-            NodeList nodeList = (NodeList) xPath.evaluate(eleXPath, doc, XPathConstants.NODESET);
-            ArrayList<ElementBean> eleBeanList = new ArrayList<ElementBean>();
-            ElementBean eleBean;
-            System.out.println("Starting processing...");
-            long start = System.currentTimeMillis();
-            long end = 0;
-            for(int i=0; i < nodeList.getLength(); i++){
-                eleBean = new ElementBean();  
-                eleBean.setNumber(i+1);
-                eleBean.setName(nodeList.item(i).getNodeName());
-                                
-                String crXPath = "(//xbrl/"+eleBean.getName()+"/@contextRef)";
-                Node crNode = (Node) xPath.evaluate(crXPath, doc, XPathConstants.NODE);
-                if (crNode != null)
-                    eleBean.setContextRef(crNode.getNodeValue());
-      
-                
-                String dXPath = "(//xbrl/"+eleBean.getName()+"/@decimals)";
-                Node dNode = (Node) xPath.evaluate(dXPath, doc, XPathConstants.NODE);
-                if (dNode != null)
-                    eleBean.setDecimals(dNode.getNodeValue());
-                
-                String idXPath = "(//xbrl/"+eleBean.getName()+"/@id)";
-                Node idNode = (Node) xPath.evaluate(idXPath, doc, XPathConstants.NODE);
-                if (idNode != null)
-                    eleBean.setId(idNode.getNodeValue());
-                
-                String urXPath = "(//xbrl/"+eleBean.getName()+"/@unitRef)";
-                Node urNode = (Node) xPath.evaluate(urXPath, doc, XPathConstants.NODE);
-                if (urNode != null)
-                    eleBean.setUnitRef(urNode.getNodeValue());
-                              
-                String vXPath = "(//xbrl/"+eleBean.getName()+"/text())";
-                Node vNode = (Node) xPath.evaluate(vXPath, doc, XPathConstants.NODE);
-                if (vNode != null)
-                    eleBean.setValue(vNode.getNodeValue());
-                
-                //eleBean.print();    
-                
-                eleBeanList.add(eleBean);
-               
-            }
-            this.elementList = eleBeanList;
-            end = System.currentTimeMillis();
-            System.out.println("...processing is done!");
-            System.out.println(doc.toString());
-            System.out.print("Performance Time (milliseconds): "+(end-start));
+        logger.info("Starting getElementFromDoc...");
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        String eleXPath = "(//xbrl/*[@contextRef != '']/(@*|text()))";
+        NodeList nodeList = (NodeList) xPath.evaluate(eleXPath, doc, XPathConstants.NODESET);
+        ArrayList<ElementBean> eleBeanList = new ArrayList<ElementBean>();
+        ElementBean eleBean;
+        logger.info("Starting processing...");
+        long start = System.currentTimeMillis();
+        long end = 0;
+        for(int i=0; i < nodeList.getLength(); i++){
+            eleBean = new ElementBean();  
+            eleBean.setNumber(i+1);
+            eleBean.setName(nodeList.item(i).getNodeName());
+
+            String crXPath = "(//xbrl/"+eleBean.getName()+"/@contextRef)";
+            Node crNode = (Node) xPath.evaluate(crXPath, doc, XPathConstants.NODE);
+            if (crNode != null)
+                eleBean.setContextRef(crNode.getNodeValue());
+
+
+            String dXPath = "(//xbrl/"+eleBean.getName()+"/@decimals)";
+            Node dNode = (Node) xPath.evaluate(dXPath, doc, XPathConstants.NODE);
+            if (dNode != null)
+                eleBean.setDecimals(dNode.getNodeValue());
+
+            String idXPath = "(//xbrl/"+eleBean.getName()+"/@id)";
+            Node idNode = (Node) xPath.evaluate(idXPath, doc, XPathConstants.NODE);
+            if (idNode != null)
+                eleBean.setId(idNode.getNodeValue());
+
+            String urXPath = "(//xbrl/"+eleBean.getName()+"/@unitRef)";
+            Node urNode = (Node) xPath.evaluate(urXPath, doc, XPathConstants.NODE);
+            if (urNode != null)
+                eleBean.setUnitRef(urNode.getNodeValue());
+
+            String vXPath = "(//xbrl/"+eleBean.getName()+"/text())";
+            Node vNode = (Node) xPath.evaluate(vXPath, doc, XPathConstants.NODE);
+            if (vNode != null)
+                eleBean.setValue(vNode.getNodeValue());
+
+            //eleBean.print();    
+
+            eleBeanList.add(eleBean);
+
+        }
+        this.elementList = eleBeanList;
+        end = System.currentTimeMillis();
+        logger.info("...processing is done!");
+        logger.info(doc.toString());
+        logger.info("Performance Time (milliseconds): "+(end-start));
     }
            
     /**
@@ -172,33 +203,38 @@ public class XbrlInstanceBean {
      * @description: This method loads all elements and company name (from context/entity/identifier) of XBRL intance
      */
     public void getElementsFromDoc_BR(BufferedReader br, Document doc) throws IOException, XPathExpressionException {
-        System.out.println("getElementsFromDoc_BR method");
+        logger.info("getElementsFromDoc_BR method");
         long start = System.currentTimeMillis();
         long end = 0;
         XPath xPath = XPathFactory.newInstance().newXPath();
         ArrayList<ElementBean> endEleList = new ArrayList<ElementBean>();
         ArrayList<ElementBean> tempEleList = this.getSomeXbrlAttr(br);
         //get data through XPath 1.0 with above taken data
-        for (ElementBean ele: tempEleList){
-            xPath = XPathFactory.newInstance().newXPath();
-            String xp = "(//xbrl/"+ele.getName();
-            if (ele.getContextRef() != null){
-                xp += "[@contextRef = '"+ele.getContextRef()+"']";
+        try{
+            for (ElementBean ele: tempEleList){
+                xPath = XPathFactory.newInstance().newXPath();
+                String xp = "(//xbrl/"+ele.getName();
+                if (ele.getContextRef() != null){
+                    xp += "[@contextRef = '"+ele.getContextRef()+"']";
+                }
+                if (ele.getId() != null){
+                    xp += "[@id = '"+ele.getId()+"']";
+                }
+                if (ele.getDecimals() != null){
+                    xp += "[@decimals = '"+ele.getDecimals()+"']";
+                }
+                if (ele.getUnitRef() != null){
+                    xp += "[@unitRef = '"+ele.getUnitRef()+"']";
+                }
+                xp += "/text())";
+                Node node = (Node) xPath.evaluate(xp, doc, XPathConstants.NODE);
+                if (node != null)
+                    ele.setValue(node.getNodeValue());
+                endEleList.add(ele);
             }
-            if (ele.getId() != null){
-                xp += "[@id = '"+ele.getId()+"']";
-            }
-            if (ele.getDecimals() != null){
-                xp += "[@decimals = '"+ele.getDecimals()+"']";
-            }
-            if (ele.getUnitRef() != null){
-                xp += "[@unitRef = '"+ele.getUnitRef()+"']";
-            }
-            xp += "/text())";
-            Node node = (Node) xPath.evaluate(xp, doc, XPathConstants.NODE);
-            if (node != null)
-                ele.setValue(node.getNodeValue());
-            endEleList.add(ele);
+        }catch(Exception e){
+            logger.error(e.getMessage());
+            e.printStackTrace();
         }
         //getting contexts (this have to be a while/for, because there are many of them
         ArrayList<ContextBean> contextList = new ArrayList<ContextBean>();
@@ -221,7 +257,7 @@ public class XbrlInstanceBean {
         this.elementList = endEleList;
         
         end = System.currentTimeMillis();
-        System.out.print("Performance Time (milliseconds): "+(end-start));
+        logger.info("Performance Time (milliseconds): "+(end-start));
 
     }
 
@@ -230,6 +266,7 @@ public class XbrlInstanceBean {
      * @description: This method get element name, contextRef, unitRef, id, decimals attr from SEC files
      */
     public ArrayList<ElementBean> getSomeXbrlAttr(BufferedReader br) {
+        logger.info("get first xbrl elements - getSomeXbrlAttr");
         ArrayList<ElementBean> eleList = new ArrayList<ElementBean>();
         //getting some data through Regular Expressions
         try{
@@ -289,14 +326,16 @@ public class XbrlInstanceBean {
                         eleList.add(ele);
                         j++;
                     }else{
-                        System.out.println("Problem [line "+j+": "+currentLine+", RE: "+this.reXmlLine+"]");
+                        logger.error("Problem [line "+j+": "+currentLine+", RE: "+this.reXmlLine+"]");
                     }
                 }
                 
             }else{
+                logger.error("Error: getSomeXbrlAttr");
                 throw new Exception("There were some problems in this processing");
             }
         }catch(Exception e){
+            logger.error(e.getLocalizedMessage());
             e.printStackTrace();
         }
         return eleList;
